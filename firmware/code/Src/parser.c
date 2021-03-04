@@ -10,7 +10,7 @@
 
 uint8_t pf_name_cache[MAX_PROFILES][PF_CACHE_FILENAME_MAXLEN];
 
-static const uint8_t col_lookup[7][3] = {  
+static const uint8_t col_lookup[7][3] = {
    {18, 60, 103},
    {15, 57, 100},
    {12, 54, 97},
@@ -67,6 +67,7 @@ const char cmd_LEFTARROW[] = "LEFTARROW";
 const char cmd_RIGHTARROW[] = "RIGHTARROW";
 const char cmd_BACKSPACE[] = "BACKSPACE";
 const char cmd_TAB[] = "TAB";
+const char cmd_COMMA[] = "COMMA";
 const char cmd_CAPSLOCK[] = "CAPSLOCK";
 const char cmd_PRINTSCREEN[] = "PRINTSCREEN";
 const char cmd_SCROLLLOCK[] = "SCROLLLOCK";
@@ -130,7 +131,7 @@ const char cmd_LCR[] = "LCR";
 
 char* goto_next_arg(char* buf, char* buf_end)
 {
-  char* curr = buf;  
+  char* curr = buf;
   if(buf == NULL || curr >= buf_end)
     return NULL;
   while(curr < buf_end && *curr != ' ')
@@ -145,7 +146,7 @@ char* goto_next_arg(char* buf, char* buf_end)
 char* find_profile(uint8_t pid)
 {
   char* profile_fn;
-  fno.lfname = lfn_buf; 
+  fno.lfname = lfn_buf;
   fno.lfsize = FILENAME_SIZE - 1;
 
   if (f_opendir(&dir, "/") != FR_OK)
@@ -336,7 +337,7 @@ uint8_t how_many_digits(uint8_t number)
 void scan_profiles(void)
 {
   char* profile_fn;
-  fno.lfname = lfn_buf; 
+  fno.lfname = lfn_buf;
   fno.lfsize = FILENAME_SIZE - 1;
   memset(p_cache.available_profile, 0, MAX_PROFILES);
 
@@ -394,7 +395,7 @@ uint8_t get_keynames(profile_cache* ppppppp)
 
   if(f_open(&sd_file, temp_buf, FA_READ) != 0)
     goto glk_end;
-  
+
   while(f_gets(temp_buf, PATH_SIZE, &sd_file))
   {
     if(temp_buf[0] == 'z')
@@ -605,7 +606,7 @@ void parse_special_key(char* msg, my_key* this_key)
 {
   if(msg == NULL || this_key == NULL)
     return;
- 
+
   this_key->key_type = KEY_TYPE_SPECIAL;
   if(strncmp(msg, cmd_UP, strlen(cmd_UP)) == 0)
   {
@@ -670,6 +671,11 @@ void parse_special_key(char* msg, my_key* this_key)
   else if(strncmp(msg, cmd_TAB, strlen(cmd_TAB)) == 0)
   {
     this_key->code = KEY_TAB;
+    return;
+  }
+  else if(strncmp(msg, cmd_COMMA, strlen(cmd_COMMA)) == 0)
+  {
+    this_key->code = KEY_COMMA;
     return;
   }
   else if(strncmp(msg, cmd_CAPSLOCK, strlen(cmd_CAPSLOCK)) == 0)

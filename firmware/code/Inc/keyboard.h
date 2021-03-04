@@ -3,7 +3,7 @@
 
 #ifdef __cplusplus
  extern "C" {
-#endif 
+#endif
 
 #include "stm32f0xx_hal.h"
 
@@ -20,6 +20,7 @@
 #define KEY_ESC 0X29
 #define KEY_BACKSPACE 0X2A
 #define KEY_TAB 0X2B
+#define KEY_COMMA 0x36
 #define KEY_CAPS_LOCK 0X39
 #define KEY_PRINT_SCREEN 0X46
 #define KEY_SCROLL_LOCK 0X47
