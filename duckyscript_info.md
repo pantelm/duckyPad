@@ -1,6 +1,6 @@
 # Writing duckyScript
 
-[Official Discord](https://discord.gg/4sJCBx5) | [Pre-order on Tindie!](https://www.tindie.com/products/21984/) | [Getting Started](getting_started.md) | [Table of Contents](#table-of-contents)
+[Get duckyPad](https://www.tindie.com/products/21984/) | [Official Discord](https://discord.gg/4sJCBx5) | [Getting Started](getting_started.md) | [Table of Contents](#table-of-contents)
 
 ------
 
@@ -12,7 +12,9 @@ This guide gives an concise overview of duckyScript. For more information, [see 
 
 ## Examples
 
-duckyScript is very easy and straightforward to write, let's take a look at some examples first. 
+duckyScript is very easy and straightforward to write, you basically just tell it what key to press!
+
+Let's take a look at some examples first:
 
 ### Open Task Manager
 
@@ -108,14 +110,15 @@ REM types out "Hello world" 11 times (1 original + 10 repeats)
 
 ### Special Keys
 
-duckyScript also supports a whole bunch of special keys:
+duckyScript also supports a bunch of special keys:
 
 ```
-CTRL
-SHIFT
-ALT
-WINDOWS
-GUI
+CTRL / RCTRL
+SHIFT / RSHIFT
+ALT / RALT
+WINDOWS / RWINDOWS
+COMMAND / RCOMMAND (mac)
+OPTION / ROPTION (mac)
 ESC
 ENTER
 UP
@@ -212,9 +215,7 @@ Those special keys can be used on their own:
 
 * **`UP TO 6 KEYS`** can be pressed simultaneously.
 
-* For macOS, use `WINDOWS` for `Command` key, use `ALT` for `Option` key.
-
-### SWCOLOR (experimental)
+### SWCOLOR
 
 You can change the colour of a key on-the-fly with `SWCOLOR` command.
 
@@ -228,9 +229,29 @@ To change the colour of a **particular key**, use `SWCOLOR_n R G B`:
 
 * The `R G B` value should between `0` and `255`. 0 being off, 255 brightest.
 
+### DP_SLEEP
+
+You can use `DP_SLEEP` command to make duckyPad go to sleep.
+
+Backlight and screen are turned off.
+
+Press any key to wake it up.
+
+### PREV_PROFILE / NEXT_PROFILE
+
+You can use `PREV_PROFILE` or `NEXT_PROFILE` command to switch to the previous / next profile.
+
+### GOTO_PROFILE
+
+Use this command to jump to a particular profile.
+
+`GOTO_PROFILE 3` // jump to profile #3
+
 ### HOLD (experimental)
 
 Holds a key when you press it, and release only when you release it. This command makes duckyPad behave more like a traditional keyboard.
+
+Possible uses include push-to-talk voice chat, or WASD gamepad.
 
 `HOLD` command must be followed by a single key, it can be a character or a special key.
 
@@ -242,8 +263,6 @@ HOLD SHIFT
 ```
 
 You should only use `HOLD` command on its own, i.e. the script should only have a single line of `HOLD` command and nothing else.
-
-Possible uses include push-to-talk voice chat, or WASD gamepad.
 
 This command is experimental, if you run into any bugs, [let me know](#questions-or-comments)!
 

@@ -49,12 +49,25 @@ autogui_map = {"ESCAPE":"escape",
 "DELETE":"delete",
 "END":"end",
 "SPACE":"space",
+
 "SHIFT":"shift",
+"RSHIFT":"shiftright",
+
 "ALT":"alt",
+"RALT":"altright",
+"OPTION":"option",
+"ROPTION":"optionright",
+
 "GUI":"win",
 "WINDOWS":"win",
+"COMMAND":"command",
+"RWINDOWS":"winright",
+"RCOMMAND":"winright",
+
 "CONTROL":"ctrl",
 "CTRL":"ctrl",
+"RCTRL":"ctrlright",
+
 "MK_VOLUP":"volumeup",
 "MK_VOLDOWN":"volumedown",
 "MK_MUTE":"volumemute",
@@ -98,11 +111,18 @@ cmd_DEFAULT_DELAY = "DEFAULT_DELAY "
 cmd_DEFAULTCHARDELAY = "DEFAULTCHARDELAY "
 cmd_DELAY = "DELAY "
 cmd_STRING = "STRING "
-cmd_UARTPRINT = "UARTPRINT "
 cmd_HOLD = "HOLD "
 cmd_LOOP = "LOOP"
 cmd_SWCOLOR = "SWCOLOR_";
 cmd_SW_SELF_COLOR = "SWCOLOR ";
+
+ignored_but_valid_commands = ["UARTPRINT ", cmd_REM, "SWCOLOR_", "SWCOLOR ", 'DP_SLEEP', 'PREV_PROFILE', 'NEXT_PROFILE', 'GOTO_PROFILE ']
+
+def is_ignored_but_valid_command(ducky_line):
+	for item in ignored_but_valid_commands:
+		if ducky_line.startswith(item):
+			return True
+	return False
 
 PARSE_OK = 0
 PARSE_ERROR = 1
@@ -131,7 +151,7 @@ def parse_line(ducky_line):
 		return PARSE_OK
 	elif len(ducky_line) >= 254:
 		return PARSE_ERROR
-	elif ducky_line.startswith(cmd_REM) or ducky_line.startswith(cmd_UARTPRINT) or ducky_line.startswith(cmd_SWCOLOR) or ducky_line.startswith(cmd_SW_SELF_COLOR):
+	elif is_ignored_but_valid_command(ducky_line):
 		return PARSE_OK
 	elif ducky_line.startswith(cmd_LOOP) and ducky_line.endswith(':') and len(ducky_line) == 6 and ducky_line[4].isnumeric():
 		return PARSE_OK

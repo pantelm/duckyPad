@@ -53,12 +53,25 @@ autogui_map = {"ESCAPE":"escape",
 "DELETE":"delete",
 "END":"end",
 "SPACE":"space",
+
 "SHIFT":"shift",
+"RSHIFT":"shiftright",
+
 "ALT":"alt",
+"RALT":"altright",
+"OPTION":"option",
+"ROPTION":"optionright",
+
 "GUI":"win",
 "WINDOWS":"win",
+"COMMAND":"command",
+"RWINDOWS":"winright",
+"RCOMMAND":"winright",
+
 "CONTROL":"ctrl",
 "CTRL":"ctrl",
+"RCTRL":"ctrlright",
+
 "MK_VOLUP":"volumeup",
 "MK_VOLDOWN":"volumedown",
 "MK_MUTE":"volumemute",
@@ -95,17 +108,16 @@ valid_chars = ['!', '"', '#', '$', '%', '&', "'", '(',
 'a', 'b', 'c', 'd', 'e','f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '{', '|', '}', '~']
 
-cmd_REPEAT = "REPEAT "
 cmd_REM = "REM "
+cmd_REPEAT = "REPEAT "
 cmd_DEFAULTDELAY = "DEFAULTDELAY "
 cmd_DEFAULT_DELAY = "DEFAULT_DELAY "
 cmd_DEFAULTCHARDELAY = "DEFAULTCHARDELAY "
 cmd_DELAY = "DELAY "
 cmd_STRING = "STRING "
-cmd_UARTPRINT = "UARTPRINT "
 cmd_HOLD = "HOLD "
-cmd_SWCOLOR = "SWCOLOR_";
-cmd_SW_SELF_COLOR = "SWCOLOR ";
+
+ignored_but_valid_commands = ["UARTPRINT ", cmd_REM, "SWCOLOR_", "SWCOLOR ", 'DP_SLEEP', 'PREV_PROFILE', 'NEXT_PROFILE', 'GOTO_PROFILE ']
 
 default_cmd_delay_ms = 18
 default_char_delay_ms = 18
@@ -130,12 +142,24 @@ def parse_combo(combo_line):
 			if item == "SHIFT" and 'win' in sys.platform: 
 				autogui_args.append('shiftleft')
 				autogui_args.append('shiftright')
+			elif (item == "GUI" or item == "WINDOWS" or item == "RWINDOWS" or item == "RCOMMAND") and 'darwin' in sys.platform:
+				autogui_args.append('command')
+			elif item == "ALT" and 'darwin' in sys.platform:
+				autogui_args.append('option')
+			elif item == "RALT" and 'darwin' in sys.platform:
+				autogui_args.append('optionright')
 			else:
 				autogui_args.append(autogui_map[item])
 		else:
 			autogui_args.append(item.lower())
 	pyautogui.hotkey(*autogui_args, interval=default_char_delay_ms/1000)
 	return 0, ""
+
+def is_ignored_but_valid_command(ducky_line):
+	for item in ignored_but_valid_commands:
+		if ducky_line.startswith(item):
+			return True
+	return False
 
 def parse_line(ducky_line):
 	global default_cmd_delay_ms
@@ -147,7 +171,7 @@ def parse_line(ducky_line):
 		ducky_line = ducky_line.strip()
 	if len(ducky_line) <= 0:
 		return PARSE_EMPTY_LINE, parse_note
-	elif ducky_line.startswith(cmd_REM) or ducky_line.startswith(cmd_UARTPRINT) or ducky_line.startswith(cmd_SWCOLOR) or ducky_line.startswith(cmd_SW_SELF_COLOR):
+	elif is_ignored_but_valid_command(ducky_line):
 		return PARSE_OK, parse_note
 	elif ducky_line.startswith(cmd_STRING):
 		pyautogui.write(ducky_line[len(cmd_STRING):], interval=default_char_delay_ms/1000)

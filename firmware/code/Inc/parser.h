@@ -52,11 +52,24 @@ typedef struct
   uint32_t sleep_after_ms;
 } dp_global_settings;
 
+#define DPC_NONE 0
+#define DPC_SLEEP 1
+#define DPC_PREV_PROFILE 2
+#define DPC_NEXT_PROFILE 3
+#define DPC_GOTO_PROFILE 4
+
+typedef struct
+{
+  uint8_t type;
+  uint8_t data;
+} duckypad_parsed_command;
+
+void dpc_init(duckypad_parsed_command* dpc);
 void change_profile(uint8_t dir);
 void handle_keypress(uint8_t key_num, but_status* b_status);
 void scan_profiles(void);
 uint8_t get_last_profile(void);
-void restore_profile(uint8_t profile_id);
+void restore_profile(uint8_t profile_id, uint8_t reset_loop_count, uint8_t reload_colors);
 void keypress_wrap(uint8_t keynum);
 void print_legend(int8_t x_offset, int8_t y_offset);
 void save_settings(void);
@@ -74,6 +87,7 @@ extern char lfn_buf[FILENAME_SIZE];
 extern char read_buffer[READ_BUF_SIZE];
 extern char curr_kb_layout[FILENAME_SIZE];
 extern char project_url[];
+extern duckypad_parsed_command my_dpc;
 
 #ifdef __cplusplus
 }

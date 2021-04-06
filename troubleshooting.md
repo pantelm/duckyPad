@@ -1,6 +1,6 @@
 # Common Issues / Troubleshooting
 
-[Official Discord](https://discord.gg/4sJCBx5) | [Pre-order on Tindie!](https://www.tindie.com/products/21984/) | [Getting Started](getting_started.md) | [Table of Contents](#table-of-contents)
+[Get duckyPad](https://www.tindie.com/products/21984/) | [Official Discord](https://discord.gg/4sJCBx5) | [Getting Started](getting_started.md) | [Table of Contents](#table-of-contents)
 
 ----
 
@@ -14,13 +14,17 @@ Click a question below to jump to the answer!
 
 * [F13 - F24 keys doesn't work!](#f13---f24-keys-doesnt-work)
 
-* [My macro script behaves inconsistently!](#My-macro-script-behaves-inconsistently)
+* [My script behaves inconsistently!](#My-script-behaves-inconsistently)
 
 * [My duckyPad seems to be getting sluggish!](#My-duckyPad-seems-to-be-getting-sluggish)
+
+* [I want to use my own SD card!](#i-want-to-use-my-own-sd-card)
 
 * [The RGB backlight is flickering slightly!](#The-RGB-backlight-is-flickering-slightly)
 
 * [The RGB backlight is too bright!](#The-RGB-backlight-is-too-bright)
+
+* [The OLED screen isn't working properly!](#the-oled-screen-isnt-working-properly)
 
 * [Will the OLED suffer burn-in?](#Will-the-OLED-suffer-burn-in)
 
@@ -29,6 +33,10 @@ Click a question below to jump to the answer!
 * [In-app test-run doesn't work!](#In-app-test-run-doesnt-work)
 
 * [SD Card doesn't work on mac!](#SD-Card-doesnt-work-on-mac)
+
+## Join Our Discord!
+
+If you have some issues that's not in this list, feel free to join our [Official Discord](https://discord.gg/4sJCBx5) to ask about it! We also have discussions, script sharing, and latest updates!
 
 ----
 
@@ -43,6 +51,8 @@ First, make sure the key has a valid script mapped to it. If in doubt, use one o
 * Try a different cable.
 
 * Try a different USB port.
+
+* Try plugging it directly into a computer instead of through a USB hub.
 
 * Try a different computer.
 
@@ -66,9 +76,9 @@ You'll need select a different keyboard layout.
 
 ## F13 - F24 Keys doesn't work!
 
-Windows **DOES NOT** support `F13 - F24` keys. They only work on macOS / linux.
+Please [update your duckyPad to the latest firmware](https://github.com/dekuNukem/duckyPad/blob/master/firmware_updates_and_version_history.md) to fix this issue.
 
-## My macro script behaves inconsistently!
+## My script behaves inconsistently!
 
 duckyPad might be typing too fast for your computer.
 
@@ -92,7 +102,23 @@ If your duckyPad is getting slower at starting up and switching profiles, it's u
 
 * Copy the files back, it should be much faster now.
 
-You can also use your own faster SD card.
+You can also use your [own faster SD card](#i-want-to-use-my-own-sd-card).
+
+## I want to use my own SD card!
+
+* (Optional) Make a backup of the contents of the original SD card.
+
+* Format the new SD card in `FAT or FAT32`:
+
+![Alt text](resources/pics/format.PNG)
+
+![Alt text](resources/pics/macfat.png)
+
+* Copy all the files back.
+
+* You can also download the [sample profiles](https://github.com/dekuNukem/duckyPad/raw/master/sample_profiles.zip) and copy everything to the **root of your SD card**:
+
+![Alt text](resources/pics/sample_pf.png)
 
 ## The RGB backlight is flickering slightly!
 
@@ -115,6 +141,28 @@ Measures have been taken to prevent OLED burn-in.
 * The screen dims after 5 minutes.
 
 * duckyPad goes to sleep after 30 minutes ([adjustable](getting_started.md#settings--updates)).
+
+## The OLED screen isn't working properly!
+
+If your OLED screen is acting weird, you might want to try to re-seat its ribbon cable.
+
+* Disassemble until you can remove the circuit board. You can [follow this in reverse](kit_assembly_guide.md).
+
+* Locate the tabs on the ribbon cable connector:
+
+![Alt text](resources/pics/tab_locked.jpg)
+
+* Push it outwards **gently** to loosen the tab:
+
+![Alt text](resources/pics/tab_released.jpg)
+
+* Pull out the ribbon cable, and wipe the golden contacts with a dry cloth.
+
+* Insert it back all the way. Look at the above photos for reference.
+
+* Push the tab back in to lock in place.
+
+* Try it out, if it still doesn't work, [let me know](#questions-or-comments)!
 
 ## Numpad keys doesn't work!
 

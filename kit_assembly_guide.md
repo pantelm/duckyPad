@@ -1,10 +1,14 @@
 # duckyPad Assembly Guide
 
-[Official Discord](https://discord.gg/4sJCBx5) | [Pre-order on Tindie!](https://www.tindie.com/products/21984/) | [Getting Started](getting_started.md) | [Table of Contents](#table-of-contents)
+[Get duckyPad](https://www.tindie.com/products/21984/) | [Official Discord](https://discord.gg/4sJCBx5) | [Getting Started](getting_started.md) | [Table of Contents](#table-of-contents)
 
 ------
 
 Thanks for purchasing duckyPad! Here is a short guide on how to put everything together.
+
+## Join Our Discord!
+
+Feel free to join our [Official Discord](https://discord.gg/4sJCBx5) for discussions, asking questions, sharing scripts, and latest updates!
 
 ## Recommended Tools
 
@@ -126,7 +130,13 @@ Flip it over, clean the plate with a dry cloth if dirty, and stick on the anti-s
 
 Time to install the switches! duckyPad supports hot-swap, so no soldering is needed. 
 
-Make sure the pins are straight, then line up with the holes, gently push until it clicks in place:
+* **Make sure the pins are straight!**
+
+* **Make sure the pins are straight!** 
+
+* **Make sure the pins are straight!**, otherwise you might damage the circuit board or the switch itself!
+
+Then **line up with the holes**, and **`gently push straight down`** until it clicks in place:
 
 ![Alt text](resources/pics/assembly/assembly14.jpeg)
 

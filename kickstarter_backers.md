@@ -1,6 +1,6 @@
 # Kickstarter Backer Acknowledgments
 
-[Official Discord](https://discord.gg/4sJCBx5) | [Pre-order on Tindie!](https://www.tindie.com/products/21984/) | [Getting Started](getting_started.md) | [Table of Contents](#table-of-contents)
+[Get duckyPad](https://www.tindie.com/products/21984/) | [Official Discord](https://discord.gg/4sJCBx5) | [Getting Started](getting_started.md) | [Table of Contents](#table-of-contents)
 
 ------
 
@@ -407,7 +407,8 @@ Not sure what order should it be, so heres both! 😅
 | 446           | Bryn Price                                                     | 
 | 447           | Nilesh Chaudhari                                               | 
 | 449           | benwis                                                         | 
-| 450           | Peter Liang                                                    | 
+| 450           | Peter Liang                                                    |
+| 451           | Brad Peters                                                    | 
 | 452           | Ryan Meyers                                                    | 
 | 453           | Seryl                                                          | 
 | 454           | Matthew Lapinski                                               | 
@@ -571,6 +572,7 @@ Not sure what order should it be, so heres both! 😅
 | 633           | L'Emir Mohamad Chehab                                          | 
 | 634           | Marcus Rodriguez                                               | 
 | 635           | Chris G                                                        | 
+| 636           | Steph Wolf                                                     | 
 | 637           | Modex                                                          | 
 | 638           | Mervyn Chait                                                   | 
 | 639           | 諸行無常                                                           | 
@@ -761,6 +763,7 @@ Not sure what order should it be, so heres both! 😅
 | 167           | Bogdan Botnari                                                 | 
 | 519           | BonDiggity                                                     | 
 | 244           | Brad McCollum                                                  | 
+| 451           | Brad Peters                                                    | 
 | 748           | Brandon Aquino                                                 | 
 | 151           | Brett J                                                        | 
 | 457           | Brien!                                                         | 
@@ -1282,6 +1285,7 @@ Not sure what order should it be, so heres both! 😅
 | 717           | stab360                                                        | 
 | 591           | Starky                                                         | 
 | 437           | STEMRobotics                                                   | 
+| 636           | Steph Wolf                                                     | 
 | 737           | Stephan Hüper                                                  | 
 | 559           | Stephan van Rooij                                              | 
 | 108           | Stephen Bakalian                                               | 

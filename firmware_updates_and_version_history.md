@@ -1,18 +1,20 @@
 # duckyPad Firmware Updates and Version History
 
-[Official Discord](https://discord.gg/4sJCBx5) | [Pre-order on Tindie!](https://www.tindie.com/products/21984/) | [Getting Started](getting_started.md) | [Table of Contents](#table-of-contents)
+[Get duckyPad](https://www.tindie.com/products/21984/) | [Official Discord](https://discord.gg/4sJCBx5) | [Getting Started](getting_started.md) | [Table of Contents](#table-of-contents)
 
 -----
 
 ## Latest Firmware
 
-### 0.14.0
+### 0.17.0
 
-[Download Here](https://github.com/dekuNukem/duckyPad/raw/master/firmware/duckypad_v0.14.0.dfu)
+[Download Here](https://github.com/dekuNukem/duckyPad/raw/master/firmware/duckypad_v0.17.0.dfu)
 
-* Added attributions and metadata in keymap files, updated firmware to handle them.
+* `LOOP` counter is no longer reset during sleep.
 
-* Added support for cedilla deadkey in keymaps.
+* Key colour changes also persist through sleep now.
+
+* `MENU` key now works properly.
 
 ## USB Firmware Updates
 
@@ -23,8 +25,6 @@ You can update duckyPad's firmware via USB, for bug fixes and and/or new feature
 Locate the **`DFU`** button on the board:
 
 ![Alt text](resources/pics/dfu_buttons_new.jpg)
-
-![Alt text](resources/pics/buttons.jpg)
 
 * Make sure the board is unplugged.
 
@@ -50,7 +50,7 @@ In the `Available DUF Devices` section at top left corner, you should see a `STM
 
 Press the `Choose...` button and select a firmware file in `.dfu` format.
 
-* [Click me](https://github.com/dekuNukem/duckyPad/raw/master/firmware/duckypad_v0.14.0.dfu) to download the latest firmware (v0.14.0)
+* [Click me](https://github.com/dekuNukem/duckyPad/raw/master/firmware/duckypad_v0.17.0.dfu) to download the latest firmware (v0.17.0)
 
 * ...or [scroll down](#firmware-version-history) for older firmware versions.
 
@@ -58,13 +58,13 @@ Press the `Choose...` button and select a firmware file in `.dfu` format.
 
 Press `Upgrade` button to start uploading the new firmware into the microcontroller.
 
-![Alt text](resources/pics/dfu_upgrade.png)
+![Alt text](resources/pics/dfu_upgrade2.png)
 
 And now the firmware is being updated!
 
-![Alt text](resources/pics/dfu_uploading.png)
+**It should only take a few seconds!** **`Try using a USB hub`** if it is particularly slow.
 
-It can take anywhere between a few seconds to a few minutes. Try using a USB hub if it's particularly slow. 
+![Alt text](resources/pics/dfu_uploading2.png)
 
 After completion, press **`RESET`** button (or power-cycle) to start using the new firmware. 
 
@@ -81,6 +81,37 @@ Hold DFU button and connect duckyPad, then run:
 After completion, press **`RESET`** button (or power-cycle) to start using the new firmware. 
 
 ## Firmware Version History
+
+### 0.17.0
+
+[Download Here](https://github.com/dekuNukem/duckyPad/raw/master/firmware/duckypad_v0.17.0.dfu)
+
+* `LOOP` counter will no longer reset during sleep.
+
+* Key colour changes will also now persist through sleep.
+
+* `MENU` key now works properly.
+
+
+### 0.16.0
+
+[Download Here](https://github.com/dekuNukem/duckyPad/raw/master/firmware/duckypad_v0.16.0.dfu)
+
+* Added `COMMAND` and `OPTION` aliases for macOS. 
+
+* Added support for right-side modifier keys, such as `RCTRL`, `RSHFIT`, `RALT`, etc.
+
+* [Click me](https://github.com/dekuNukem/duckyPad/blob/master/duckyscript_info.md#special-keys) to learn more.
+
+### 0.15.0
+
+[Download Here](https://github.com/dekuNukem/duckyPad/raw/master/firmware/duckypad_v0.15.0.dfu)
+
+* Added `DP_SLEEP` command to make duckyPad to go sleep.
+
+* Added `PREV_PROFILE`, `NEXT_PROFILE`, and `GOTO_PROFILE` commands for profile switching.
+
+* Fixed a bug, `F13 - F24` keys should work properly now.
 
 ### 0.14.0
 
