@@ -7,6 +7,7 @@
 #include "ssd1306.h"
 #include "keyboard.h"
 #include "animations.h"
+#include "usbd_desc.h"
 
 uint8_t pf_name_cache[MAX_PROFILES][PF_CACHE_FILENAME_MAXLEN];
 
@@ -41,6 +42,7 @@ char nonexistent_keyname[] = "\253";
 profile_cache p_cache;
 dp_global_settings dp_settings;
 my_key hold_cache[MAPPABLE_KEY_COUNT];
+my_key hold_cach2[MAPPABLE_KEY_COUNT];
 char curr_kb_layout[FILENAME_SIZE] = "default";
 uint8_t key_max_loop[MAPPABLE_KEY_COUNT];
 uint8_t key_press_count[MAPPABLE_KEY_COUNT];
@@ -144,6 +146,12 @@ const char cmd_SLEEP[] = "DP_SLEEP";
 const char cmd_PREV_PROFILE[] = "PREV_PROFILE";
 const char cmd_NEXT_PROFILE[] = "NEXT_PROFILE";
 const char cmd_GOTO_PROFILE[] = "GOTO_PROFILE";
+
+const char cmd_LMOUSE[] = "LMOUSE";
+const char cmd_RMOUSE[] = "RMOUSE";
+const char cmd_MMOUSE[] = "MMOUSE";
+const char cmd_MOUSE_MOVE[] = "MOUSE_MOVE ";
+const char cmd_MOUSE_WHEEL[] = "MOUSE_WHEEL ";
 
 char* goto_next_arg(char* buf, char* buf_end)
 {
@@ -503,7 +511,7 @@ void save_last_profile(uint8_t profile_id)
   if(f_open(&sd_file, "dp_stats.txt", FA_CREATE_ALWAYS | FA_WRITE) != 0)
     goto slp_end;
   memset(temp_buf, 0, PATH_SIZE);
-  sprintf(temp_buf, "lp %d\nfw %d.%d.%d\n", profile_id, fw_version_major, fw_version_minor, fw_version_patch);
+  sprintf(temp_buf, "lp %d\nfw %d.%d.%d\nser %s", profile_id, fw_version_major, fw_version_minor, fw_version_patch, make_serial_string());
   f_write(&sd_file, temp_buf, strlen(temp_buf), &ignore_this);
   slp_end:
   f_close(&sd_file);
@@ -569,6 +577,8 @@ void reset_hold_cache(void)
   {
     hold_cache[i].key_type = KEY_TYPE_UNKNOWN;
     hold_cache[i].code = 0;
+    hold_cach2[i].key_type = KEY_TYPE_UNKNOWN;
+    hold_cach2[i].code = 0;
   }
 }
 
@@ -923,7 +933,6 @@ void parse_special_key(char* msg, my_key* this_key)
   }
 
 // ----------------------------------
-
   this_key->key_type = KEY_TYPE_MEDIA;
   if(strncmp(msg, cmd_MK_VOLUP, strlen(cmd_MK_VOLUP)) == 0)
   {
@@ -965,10 +974,43 @@ void parse_special_key(char* msg, my_key* this_key)
     this_key->code = KEY_MK_STOP;
     return;
   }
+
+  // ----------------------------------
+  this_key->key_type = KEY_TYPE_MOUSE_BUTTON;
+  if(strncmp(msg, cmd_LMOUSE, strlen(cmd_LMOUSE)) == 0)
+  {
+    this_key->code = 1;
+    return;
+  }
+  else if(strncmp(msg, cmd_RMOUSE, strlen(cmd_RMOUSE)) == 0)
+  {
+    this_key->code = 2;
+    return;
+  }
+  else if(strncmp(msg, cmd_MMOUSE, strlen(cmd_MMOUSE)) == 0)
+  {
+    this_key->code = 4;
+    return;
+  }
+  else if(strncmp(msg, cmd_MOUSE_MOVE, strlen(cmd_MOUSE_MOVE)) == 0)
+  {
+    char* msg_end = msg + strlen(msg);
+    char* curr = goto_next_arg(msg, msg_end);
+    this_key->code = atoi(curr);
+    this_key->code2 = atoi(goto_next_arg(curr, msg_end));
+    this_key->key_type = KEY_TYPE_MOUSE_MOVEMENT;
+    return;
+  }
+  else if(strncmp(msg, cmd_MOUSE_WHEEL, strlen(cmd_MOUSE_WHEEL)) == 0)
+  {
+    this_key->code = atoi(goto_next_arg(msg, msg + strlen(msg)));
+    this_key->key_type = KEY_TYPE_MOUSE_WHEEL;
+    return;
+  }
   init_my_key(this_key);
 }
 
-/* able to press 3 keys at once
+/* able to press 6 keys at once
 action type
 0 press then release
 1 press only
@@ -1088,20 +1130,42 @@ uint8_t is_empty_line(char* line)
 
 uint8_t parse_hold(char* line, uint8_t keynum)
 {
-  line = goto_next_arg(line, line + strlen(line));
   if(line == NULL)
     return PARSE_ERROR;
-  my_key this_key;
-  parse_special_key(line, &this_key);
-  if(this_key.key_type == KEY_TYPE_UNKNOWN)
+
+  my_key key_1, key_2;
+  char* line_end = line + strlen(line);
+  char *arg1 = goto_next_arg(line, line_end);
+  char *arg2 = goto_next_arg(arg1, line_end);
+  
+  parse_special_key(arg1, &key_1);
+  if(key_1.key_type == KEY_TYPE_UNKNOWN)
   {
-    this_key.key_type = KEY_TYPE_CHAR;
-    this_key.code = line[0];
+    key_1.key_type = KEY_TYPE_CHAR;
+    key_1.code = arg1[0];
   }
-  hold_cache[keynum].key_type = this_key.key_type;
-  hold_cache[keynum].code = this_key.code;
-  keyboard_press(&this_key, 0);
+  hold_cache[keynum].key_type = key_1.key_type;
+  hold_cache[keynum].code = key_1.code;
+
+  if(arg2 != NULL)
+  {
+    parse_special_key(arg2, &key_2);
+    if(key_2.key_type == KEY_TYPE_UNKNOWN)
+    {
+      key_2.key_type = KEY_TYPE_CHAR;
+      key_2.code = arg2[0];
+    }
+    hold_cach2[keynum].key_type = key_2.key_type;
+    hold_cach2[keynum].code = key_2.code;
+  }
+
+  keyboard_press(&key_1, 0);
   osDelay(DEFAULT_CHAR_DELAY_MS);
+  if(arg2 != NULL)
+  {
+    keyboard_press(&key_2, 0);
+    osDelay(DEFAULT_CHAR_DELAY_MS);
+  }
   return PARSE_OK;
 }
 
@@ -1123,9 +1187,16 @@ uint8_t parse_line(char* line, uint8_t keynum)
   }
 
   my_key this_key;
-  parse_special_key(line, &this_key); //special_key
+  parse_special_key(line, &this_key);
   if(is_empty_line(line))
     result = PARSE_EMPTY_LINE;
+  else if(is_mouse_type(&this_key))
+  {
+    keyboard_press(&this_key, 0);
+    osDelay(cmd_delay);
+    keyboard_release(&this_key);
+    osDelay(cmd_delay);
+  }
   else if(this_key.key_type != KEY_TYPE_UNKNOWN)
     parse_combo(line, &this_key);
   else if(strncmp(cmd_REM, line, strlen(cmd_REM)) == 0)

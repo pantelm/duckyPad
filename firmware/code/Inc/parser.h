@@ -40,6 +40,7 @@ typedef struct
   uint8_t individual_key_color[MAPPABLE_KEY_COUNT][3];
   uint8_t individual_keydown_color[MAPPABLE_KEY_COUNT][3];
 } profile_cache;
+extern profile_cache p_cache;
 
 typedef struct
 {
@@ -83,6 +84,8 @@ extern profile_cache p_cache;
 extern char temp_buf[PATH_SIZE];
 extern dp_global_settings dp_settings;
 extern my_key hold_cache[MAPPABLE_KEY_COUNT];
+extern my_key hold_cach2[MAPPABLE_KEY_COUNT];
+
 extern char lfn_buf[FILENAME_SIZE];
 extern char read_buffer[READ_BUF_SIZE];
 extern char curr_kb_layout[FILENAME_SIZE];

@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include "my_tasks.h"
 #include "shared.h"
-#include "usbd_hid.h"
+#include "usbd_customhid.h"
 #include "ssd1306.h"
 #include "fonts.h"
 #include "neopixel.h"
@@ -11,6 +11,8 @@
 #include "keyboard.h"
 #include "parser.h"
 #include "animations.h"
+#include "usb_device.h"
+#include "usbd_desc.h"
 
 #define LONG_PRESS_MS 500
 #define MAX_KEYMAP_SIZE 8
@@ -18,10 +20,16 @@
 uint8_t init_complete;
 uint32_t last_keypress;
 uint32_t next_pixel_shift = 30000;
-uint8_t is_sleeping, is_in_settings;
+uint8_t is_sleeping, is_busy;
 uint32_t button_hold_start, button_hold_duration;
 keymap_cache my_keymap_cache[MAX_KEYMAP_SIZE];
 char default_str[] = "default";
+
+void oled_full_brightness()
+{
+  last_keypress = HAL_GetTick();
+  ssd1306_dim(0);
+}
 
 void draw_brightness_value()
 {
@@ -137,7 +145,7 @@ void profile_quickswitch(void)
   }
 }
 
-void handle_button_press(uint8_t button_num)
+void handle_tactile_button_press(uint8_t button_num)
 {
     button_hold_start = HAL_GetTick();
     while(1)
@@ -161,7 +169,7 @@ void handle_button_press(uint8_t button_num)
     }
     else // long press
     {
-      is_in_settings = 1;
+      is_busy = 1;
       if(button_num == KEY_BUTTON1) // -
       {
         change_brightness();
@@ -172,7 +180,7 @@ void handle_button_press(uint8_t button_num)
         profile_quickswitch();
       }
 
-      is_in_settings = 0;
+      is_busy = 0;
       print_legend(0, 0);
       service_all();
     }
@@ -401,7 +409,7 @@ void keymap_config(void)
   all_led_off();
   osDelay(50);
   service_all();
-  is_in_settings = 1;
+  is_busy = 1;
   print_keymap(current_keymap_page);
 
   while(1)
@@ -453,9 +461,164 @@ void keymap_config(void)
   keymap_setting_end:
   save_last_profile(p_cache.current_profile);
   service_all();
-  is_in_settings = 0;
+  is_busy = 0;
   print_legend(0, 0);
   save_settings();
+}
+
+uint8_t command_type, seq_number;
+uint8_t hid_tx_buf[HID_TX_BUF_SIZE];
+
+#define HID_COMMAND_GET_INFO 0
+#define HID_COMMAND_GOTO_PROFILE 1
+#define HID_COMMAND_PREV_PROFILE 2
+#define HID_COMMAND_NEXT_PROFILE 3
+#define HID_COMMAND_RELOAD_CURRENT_PROFILE 4
+#define HID_COMMAND_SW_COLOR 5
+#define HID_COMMAND_PRINT_TEXT 6
+#define HID_COMMAND_PRINT_BITMAP 7
+#define HID_COMMAND_CLEAR_SCREEN 8
+#define HID_COMMAND_UPDATE_SCREEN 9
+void handle_hid_command(void)
+{
+  // hid_rx_buf HID_RX_BUF_SIZE
+  // hid_tx_buf HID_TX_BUF_SIZE
+
+  // printf("new data!\n");
+  // for (int i = 0; i < HID_RX_BUF_SIZE; ++i)
+  //   printf("%d, ", hid_rx_buf[i]);
+  // printf("\ndone\n");
+
+  seq_number = hid_rx_buf[1];
+  command_type = hid_rx_buf[2];
+
+  memset(hid_tx_buf, 0, HID_TX_BUF_SIZE);
+  hid_tx_buf[0] = 4;
+  hid_tx_buf[1] = seq_number;
+  hid_tx_buf[2] = 0;
+
+  /*
+  duckyPad to PC
+  [0]   report_id: always 4
+  [1]   seq number (same as above)
+  [2]   0 = OK, 1 = ERROR, 2 = BUSY
+  */
+  if(is_busy)
+  {
+    hid_tx_buf[2] = 2;
+    USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, hid_tx_buf, HID_TX_BUF_SIZE);
+    return;
+  }
+
+  /*
+  HID GET INFO
+  -----------
+  PC to duckyPad:
+  [0]   report_id: always 5
+  [1]   seq number
+  [2]   command: 0
+  -----------
+  duckyPad to PC
+  [0]   report_id: always 4
+  [1]   seq number (same as above)
+  [2]   0 = OK
+  [3]   firmware version major
+  [4]   firmware version minor
+  [5]   firmware version patch
+  [6]   hardware revision
+  [7 - 10]   UUID (uint32_t)
+  [11]   current profile
+  */
+  if(command_type == HID_COMMAND_GET_INFO)
+  {
+    hid_tx_buf[3] = fw_version_major;
+    hid_tx_buf[4] = fw_version_minor;
+    hid_tx_buf[5] = fw_version_patch;
+    hid_tx_buf[6] = 20;
+    uint32_t uuid = get_uuid();
+    memcpy(hid_tx_buf + 7, &uuid, 4);
+    hid_tx_buf[11] = p_cache.current_profile;
+    USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, hid_tx_buf, HID_TX_BUF_SIZE);
+  }
+  /*
+  HID GOTO PROFILE
+  -----------
+  PC to duckyPad:
+  [0]   report_id: always 5
+  [1]   seq number
+  [2]   command: 1
+  [3]   profile number to switch to
+  -----------
+  duckyPad to PC
+  [0]   report_id: always 4
+  [1]   seq number (same as above)
+  [2]   0 = OK, 1 = ERROR
+  */
+  else if(command_type == HID_COMMAND_GOTO_PROFILE)
+  {
+    if(p_cache.available_profile[hid_rx_buf[3]])
+    {
+      USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, hid_tx_buf, HID_TX_BUF_SIZE);
+      oled_full_brightness();
+      restore_profile(hid_rx_buf[3], 1, 1);
+    }
+    else
+    {
+      hid_tx_buf[2] = 1;
+      USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, hid_tx_buf, HID_TX_BUF_SIZE);
+    }
+  }
+  /*
+  HID PREV PROFILE
+  -----------
+  PC to duckyPad:
+  [0]   report_id: always 5
+  [1]   seq number
+  [2]   command: 2
+  -----------
+  duckyPad to PC
+  [0]   report_id: always 4
+  [1]   seq number (same as above)
+  [2]   0 = OK
+  */
+  else if(command_type == HID_COMMAND_PREV_PROFILE)
+  {
+    USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, hid_tx_buf, HID_TX_BUF_SIZE);
+    oled_full_brightness();
+    change_profile(PREV_PROFILE);
+  }
+  /*
+  HID NEXT PROFILE
+  -----------
+  PC to duckyPad:
+  [0]   report_id: always 5
+  [1]   seq number
+  [2]   command: 3
+  -----------
+  duckyPad to PC
+  [0]   report_id: always 4
+  [1]   seq number (same as above)
+  [2]   0 = OK
+  */
+  else if(command_type == HID_COMMAND_NEXT_PROFILE)
+  {
+    USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, hid_tx_buf, HID_TX_BUF_SIZE);
+    oled_full_brightness();
+    change_profile(NEXT_PROFILE);
+  }
+  /*
+    unknown command
+    -----------
+    duckyPad to PC
+    [0]   report_id: always 4
+    [1]   seq number
+    [2]   1 = ERROR
+    */
+  else
+  {
+    hid_tx_buf[2] = 1;
+    USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, hid_tx_buf, HID_TX_BUF_SIZE);
+  }
 }
 
 void keypress_task_start(void const * argument)
@@ -472,8 +635,7 @@ void keypress_task_start(void const * argument)
     {
       if(is_pressed(&button_status[i]))
       {
-        last_keypress = HAL_GetTick();
-        ssd1306_dim(0); // OLED back to full brightness
+        oled_full_brightness(); // OLED back to full brightness
 
         if(is_sleeping) // wake up from sleep
         {
@@ -489,10 +651,17 @@ void keypress_task_start(void const * argument)
           {
             keyboard_press(&hold_cache[i], 0);
             osDelay(DEFAULT_CHAR_DELAY_MS);
+            if(hold_cach2[i].key_type != KEY_TYPE_UNKNOWN && hold_cach2[i].code != 0)
+            {
+              keyboard_press(&hold_cach2[i], 0);
+              osDelay(DEFAULT_CHAR_DELAY_MS);
+            }
           }
           else
           {
+            is_busy = 1;
             handle_keypress(i, &button_status[i]); // handle the button state inside here for repeats
+            is_busy = 0;
             keydown_anime_end(i);
             if(my_dpc.type == DPC_SLEEP)
             {
@@ -518,13 +687,18 @@ void keypress_task_start(void const * argument)
           }
         }
         else if(i == KEY_BUTTON1 || i == KEY_BUTTON2)
-          handle_button_press(i);
+          handle_tactile_button_press(i);
       }
       if(is_released_but_not_serviced(&button_status[i]) && hold_cache[i].key_type != KEY_TYPE_UNKNOWN && hold_cache[i].code != 0)
       {
         last_keypress = HAL_GetTick();
         keyboard_release(&hold_cache[i]);
         osDelay(DEFAULT_CHAR_DELAY_MS);
+        if(hold_cach2[i].key_type != KEY_TYPE_UNKNOWN && hold_cach2[i].code != 0)
+        {
+          keyboard_release(&hold_cach2[i]);
+          osDelay(DEFAULT_CHAR_DELAY_MS);
+        }
         keydown_anime_end(i);
       }
       key_task_end:
@@ -539,6 +713,7 @@ void start_sleeping(void)
   key_led_shutdown();
   ssd1306_Fill(Black);
   ssd1306_UpdateScreen();
+  osDelay(100);
   is_sleeping = 1;
 }
 
@@ -551,6 +726,14 @@ void animation_task_start(void const * argument)
   {
     osDelay(20);
     led_animation_handler();
+
+    if(hid_rx_has_unprocessed_data)
+    {
+      handle_hid_command();
+      hid_rx_has_unprocessed_data = 0;
+      memset(hid_rx_buf, 0, HID_RX_BUF_SIZE);
+    }
+
     if(is_sleeping)
       continue;
 
@@ -560,7 +743,7 @@ void animation_task_start(void const * argument)
     if(HAL_GetTick() - last_keypress > 300000)
       ssd1306_dim(1);
     // shift pixels around every 2 minutes to prevent burn-in
-    if(is_in_settings == 0 && HAL_GetTick() > next_pixel_shift)
+    if(is_busy == 0 && HAL_GetTick() > next_pixel_shift)
     {
       if(has_valid_profiles)
         print_legend(rand()%3-1, rand()%3-1); // -1 to 1
