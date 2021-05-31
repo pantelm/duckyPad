@@ -65,8 +65,6 @@ The samples might be fun, but duckyPad's true purpose is to do what YOU want! So
 
 * You *can* insert/remove the SD card while duckyPad is on.
 
-* But doing so might corrupt SD card content, so make backups.
-
 * If you decide to use your own SD card, it should be formatted in [FAT32 or FAT](resources/pics/format.PNG).
 
 ### Download the duckyPad Configurator
@@ -223,9 +221,25 @@ Eject the SD card from your computer, insert it into duckyPad, plug it in. It sh
 
 * **`Hold down`** `-` button to change RGB backlight brightness.
 
+### USB-based profile editing
+
+A **BETA TEST** is currently underway for editing profiles WITHOUT needing to remove the SD card.
+
+[Click me to try it out!](https://gist.github.com/dekuNukem/3d4ca966c83dca38ae89ee1142806ef2)
+
+[Let me know](#questions-or-comments) if you have any issues or feedbacks!
+
 ### Profile auto-switching
 
 You can also [use this app](https://github.com/dekuNukem/duckyPad-profile-autoswitcher) to **switch profiles automatically** based on **current active window**. Check it out!
+
+### Careful with Passwords!
+
+It might be tempting to have duckyPad type out your often-used passwords, but it's probably **NOT a good idea**!
+
+All scripts are stored as plain text on the SD card, and can be easily accessed by using a SD card reader, or though HID commands.
+
+duckyPad is NOT intended to be a security device, so use at your own risk.
 
 ## Tips and Tricks
 
@@ -308,6 +322,8 @@ To do this, duckyPad can be set up to press a simple combo like `WIN + F1`, whic
 * Now you can write your own autohotkey script to do whatever you want!
 
 Check out the [official tutorials](https://www.autohotkey.com/docs_1.0/Tutorial.htm), the [autohotkey profile](sample_profiles/profile7_autohotkey), and the [sample autohotkey script](resources/duckypad_autohotkey_script.ahk) upon which you can tinker with.
+
+[Follow this guide](https://www.autohotkey.com/docs/FAQ.htm#Startup) to run your AHK scripts automatically on Windows startup.
 
 For macOS, you can try [bettertouchtool](https://folivora.ai).
 

@@ -51,7 +51,7 @@
   */ 
 
 #define CUSTOM_HID_EPIN_ADDR                 0x81
-#define CUSTOM_HID_EPIN_SIZE                 31
+#define CUSTOM_HID_EPIN_SIZE                 63
 
 #define CUSTOM_HID_EPOUT_ADDR                0x01
 #define CUSTOM_HID_EPOUT_SIZE                USBD_CUSTOMHID_OUTREPORT_BUF_SIZE
@@ -75,7 +75,7 @@
 #define CUSTOM_HID_REQ_GET_REPORT            0x01
 
 extern uint8_t hid_rx_buf[HID_RX_BUF_SIZE];
-extern uint8_t hid_rx_has_unprocessed_data;
+extern volatile uint8_t hid_rx_has_unprocessed_data;
 
 /**
   * @}

@@ -31,7 +31,7 @@ FILINFO fno;
 uint8_t mount_result;
 uint8_t has_valid_profiles;
 uint16_t cmd_delay, char_delay;
-unsigned int ignore_this;
+unsigned int bytes_read;
 duckypad_parsed_command my_dpc;
 char temp_buf[PATH_SIZE];
 char lfn_buf[FILENAME_SIZE];
@@ -152,6 +152,9 @@ const char cmd_RMOUSE[] = "RMOUSE";
 const char cmd_MMOUSE[] = "MMOUSE";
 const char cmd_MOUSE_MOVE[] = "MOUSE_MOVE ";
 const char cmd_MOUSE_WHEEL[] = "MOUSE_WHEEL ";
+
+const char cmd_KEYDOWN[] = "KEYDOWN ";
+const char cmd_KEYUP[] = "KEYUP ";
 
 char* goto_next_arg(char* buf, char* buf_end)
 {
@@ -512,7 +515,7 @@ void save_last_profile(uint8_t profile_id)
     goto slp_end;
   memset(temp_buf, 0, PATH_SIZE);
   sprintf(temp_buf, "lp %d\nfw %d.%d.%d\nser %s", profile_id, fw_version_major, fw_version_minor, fw_version_patch, make_serial_string());
-  f_write(&sd_file, temp_buf, strlen(temp_buf), &ignore_this);
+  f_write(&sd_file, temp_buf, strlen(temp_buf), &bytes_read);
   slp_end:
   f_close(&sd_file);
 }
@@ -541,7 +544,7 @@ void save_settings(void)
     goto ss_end;
   memset(temp_buf, 0, PATH_SIZE);
   sprintf(temp_buf, "sleep_after_min %d\nbi %d\nkbl %s\n", dp_settings.sleep_after_ms/60000, brightness_index, curr_kb_layout);
-  f_write(&sd_file, temp_buf, strlen(temp_buf), &ignore_this);
+  f_write(&sd_file, temp_buf, strlen(temp_buf), &bytes_read);
   ss_end:
   f_close(&sd_file);
 }
@@ -1010,13 +1013,17 @@ void parse_special_key(char* msg, my_key* this_key)
   init_my_key(this_key);
 }
 
+#define ACTION_PRESS_ONLY 0
+#define ACTION_RELEASE_ONLY 1
+#define ACTION_PRESS_RELEASE 2
+
 /* able to press 6 keys at once
 action type
-0 press then release
-1 press only
-2 release only
+0 press only
+1 release only
+2 press then release
 */
-void parse_combo(char* line, my_key* first_key)
+void parse_combo(char* line, my_key* first_key, uint8_t action_type)
 {
   if(line == NULL || first_key == NULL)
     return;
@@ -1059,60 +1066,68 @@ void parse_combo(char* line, my_key* first_key)
     key_5.key_type = KEY_TYPE_CHAR;
     key_5.code = arg5[0];
   }
-  keyboard_press(first_key, 0);
-  osDelay(char_delay);
-  if(arg1 != NULL)
+  // ------ press --------
+  if(action_type == ACTION_PRESS_ONLY || action_type == ACTION_PRESS_RELEASE)
   {
-    keyboard_press(&key_1, 0);
+    keyboard_press(first_key, 0);
+    osDelay(char_delay);
+    if(arg1 != NULL)
+    {
+      keyboard_press(&key_1, 0);
+      osDelay(char_delay);
+    }
+    if(arg2 != NULL)
+    {
+      keyboard_press(&key_2, 0);
+      osDelay(char_delay);
+    }
+    if(arg3 != NULL)
+    {
+      keyboard_press(&key_3, 0);
+      osDelay(char_delay);
+    }
+    if(arg4 != NULL)
+    {
+      keyboard_press(&key_4, 0);
+      osDelay(char_delay);
+    }
+    if(arg5 != NULL)
+    {
+      keyboard_press(&key_5, 0);
+      osDelay(char_delay);
+    }
+  }
+  // ------ release --------
+  if(action_type == ACTION_RELEASE_ONLY || action_type == ACTION_PRESS_RELEASE)
+  {
+    if(arg5 != NULL)
+    {
+      keyboard_release(&key_5);
+      osDelay(char_delay);
+    }
+    if(arg4 != NULL)
+    {
+      keyboard_release(&key_4);
+      osDelay(char_delay);
+    }
+    if(arg3 != NULL)
+    {
+      keyboard_release(&key_3);
+      osDelay(char_delay);
+    }
+    if(arg2 != NULL)
+    {
+      keyboard_release(&key_2);
+      osDelay(char_delay);
+    }
+    if(arg1 != NULL)
+    {
+      keyboard_release(&key_1);
+      osDelay(char_delay);
+    }
+    keyboard_release(first_key);
     osDelay(char_delay);
   }
-  if(arg2 != NULL)
-  {
-    keyboard_press(&key_2, 0);
-    osDelay(char_delay);
-  }
-  if(arg3 != NULL)
-  {
-    keyboard_press(&key_3, 0);
-    osDelay(char_delay);
-  }
-  if(arg4 != NULL)
-  {
-    keyboard_press(&key_4, 0);
-    osDelay(char_delay);
-  }
-  if(arg5 != NULL)
-  {
-    keyboard_press(&key_5, 0);
-    osDelay(char_delay);
-  }
-  if(arg5 != NULL)
-  {
-    keyboard_release(&key_5);
-    osDelay(char_delay);
-  }
-  if(arg4 != NULL)
-  {
-    keyboard_release(&key_4);
-    osDelay(char_delay);
-  }
-  if(arg3 != NULL)
-  {
-    keyboard_release(&key_3);
-    osDelay(char_delay);
-  }
-  if(arg2 != NULL)
-  {
-    keyboard_release(&key_2);
-    osDelay(char_delay);
-  }
-  if(arg1 != NULL)
-  {
-    keyboard_release(&key_1);
-    osDelay(char_delay);
-  }
-  keyboard_release(first_key);
-  osDelay(char_delay);
 }
 
 uint16_t get_arg(char* line)
@@ -1198,7 +1213,7 @@ uint8_t parse_line(char* line, uint8_t keynum)
     osDelay(cmd_delay);
   }
   else if(this_key.key_type != KEY_TYPE_UNKNOWN)
-    parse_combo(line, &this_key);
+    parse_combo(line, &this_key, ACTION_PRESS_RELEASE);
   else if(strncmp(cmd_REM, line, strlen(cmd_REM)) == 0)
     ;
   else if(strncmp(cmd_LCR, line, strlen(cmd_LCR)) == 0)
@@ -1206,6 +1221,26 @@ uint8_t parse_line(char* line, uint8_t keynum)
     memset(key_press_count, 0, MAPPABLE_KEY_COUNT);
     result = PARSE_OK;
     goto parse_end;
+  }
+  else if(strncmp(cmd_KEYDOWN, line, strlen(cmd_KEYDOWN)) == 0)
+  {
+    parse_special_key(line + strlen(cmd_KEYDOWN), &this_key);
+    if(this_key.key_type == KEY_TYPE_UNKNOWN)
+    {
+      this_key.key_type = KEY_TYPE_CHAR;
+      this_key.code = (line + strlen(cmd_KEYDOWN))[0];
+    }
+    parse_combo(line + strlen(cmd_KEYDOWN), &this_key, ACTION_PRESS_ONLY);
+  }
+  else if(strncmp(cmd_KEYUP, line, strlen(cmd_KEYUP)) == 0)
+  {
+    parse_special_key(line + strlen(cmd_KEYUP), &this_key);
+    if(this_key.key_type == KEY_TYPE_UNKNOWN)
+    {
+      this_key.key_type = KEY_TYPE_CHAR;
+      this_key.code = (line + strlen(cmd_KEYUP))[0];
+    }
+    parse_combo(line + strlen(cmd_KEYUP), &this_key, ACTION_RELEASE_ONLY);
   }
   else if(strncmp(cmd_STRING, line, strlen(cmd_STRING)) == 0)
     kb_print(line + strlen(cmd_STRING), char_delay);
