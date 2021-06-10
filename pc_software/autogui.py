@@ -99,7 +99,9 @@ autogui_map = {"ESCAPE":"escape",
 "KP_0":"num0",
 "KP_DOT":".",
 "KP_EQUAL":"=",
-"POWER":""
+"POWER":"",
+"LMOUSE":"",
+"RMOUSE":"",
 }
 
 cmd_LMOUSE = "LMOUSE"
@@ -128,7 +130,10 @@ cmd_DELAY = "DELAY "
 cmd_STRING = "STRING "
 cmd_HOLD = "HOLD "
 
-ignored_but_valid_commands = ["UARTPRINT ", cmd_HOLD, cmd_REM, "SWCOLOR_", "SWCOLOR ", 'DP_SLEEP', 'PREV_PROFILE', 'NEXT_PROFILE', 'GOTO_PROFILE ']
+DEFAULTDELAYFUZZ = "DEFAULTDELAYFUZZ ";
+DEFAULTCHARDELAYFUZZ = "DEFAULTCHARDELAYFUZZ ";
+
+ignored_but_valid_commands = ["UARTPRINT ", DEFAULTDELAYFUZZ, DEFAULTCHARDELAYFUZZ, cmd_HOLD, cmd_REM, "SWCOLOR_", "SWCOLOR ", 'DP_SLEEP', 'PREV_PROFILE', 'NEXT_PROFILE', 'GOTO_PROFILE ']
 
 default_cmd_delay_ms = 18
 default_char_delay_ms = 18

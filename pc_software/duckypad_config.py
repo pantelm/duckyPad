@@ -61,7 +61,7 @@ default_button_color = 'SystemButtonFace'
 if 'linux' in sys.platform:
     default_button_color = 'grey'
 
-THIS_VERSION_NUMBER = '0.13.0'
+THIS_VERSION_NUMBER = '0.13.2'
 MAIN_WINDOW_WIDTH = 800
 MAIN_WINDOW_HEIGHT = 625
 MAIN_COLOUM_HEIGHT = 533
@@ -1269,7 +1269,7 @@ def t1_worker():
                 select_root_folder(hid_dump_path)
                 dp_root_folder_display.set("done!")
             except Exception as e:
-                messagebox.showerror("Error", "error:\n\n"+str(e))
+                messagebox.showerror("Error", "error:\n\n"+str(traceback.format_exc()))
                 dp_root_folder_display.set("HID load error!")
                 continue
         if current_hid_op == HID_SAVE:
@@ -1285,7 +1285,7 @@ def t1_worker():
                     pass
                 os.rename(hid_modified_dir_path, hid_dump_path)
             except Exception as e:
-                messagebox.showerror("error", "Save error: " + str(e))
+                messagebox.showerror("error", "Save error: " + str(traceback.format_exc()))
                 dp_root_folder_display.set("Save FAILED!")
 
 t1 = threading.Thread(target=t1_worker, daemon=True)
