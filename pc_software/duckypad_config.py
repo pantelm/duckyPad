@@ -21,11 +21,14 @@ import json
 import subprocess
 import hid_op
 import threading
-
+# from elevate import elevate
 
 def ensure_dir(dir_path):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
+
+def is_root():
+    return os.getuid() == 0
 
 appname = 'duckypad_config'
 appauthor = 'dekuNukem'
@@ -208,21 +211,47 @@ HID_DUMP = 1
 HID_SAVE = 2
 current_hid_op = HID_NOP
 is_using_hid = False
-# hid_dump_progress_str = StringVar()
-# hid_dump_progress_str.set('hid_dump_progress_str')
 
 def connect_button_click():
     global current_hid_op
     global is_using_hid
-    try:
-        hid_op.duckypad_hid_init()
-        current_hid_op = HID_DUMP
-        is_using_hid = True
-    except Exception as e:
-        if(messagebox.askokcancel("Info", "Connection failed: " + str(e) + "\n\nSelect the SD card root folder instead?") == False):
+
+    is_using_hid = False
+    
+    if hid_op.get_duckypad_path() is None:
+        if(messagebox.askokcancel("Info", "duckyPad not found!\n\nConfigure via SD card instead?") == False):
             return
         select_root_folder()
-        is_using_hid = False
+        return
+
+    init_success = True
+    hid_op.duckypad_hid_close()
+    try:
+        hid_op.duckypad_hid_init()
+    except Exception as e:
+        init_success = False
+
+    if init_success:
+        current_hid_op = HID_DUMP
+        is_using_hid = True
+        return
+
+    if init_success is False and 'darwin' in sys.platform and is_root() is False:
+        box_result = messagebox.askyesnocancel("Info", "duckyPad detected, but this app lacks permission to access it.\n\nClick Yes to see instructions\n\nClick No to configure via SD card.")
+        if box_result is True:
+            # elevate(graphical=False)
+            webbrowser.open('https://github.com/dekuNukem/duckyPad/blob/master/troubleshooting.md#autoswitcher--usb-configuration-isnt-working-on-macos')
+        elif box_result is False:
+            select_root_folder()
+        return
+
+    if init_success is False and 'darwin' in sys.platform and is_root() is True:
+        box_result = messagebox.askyesnocancel("Info", "duckyPad detected, however, due to macOS restrictions, you'll need to enable some privacy settings.\n\nClick Yes to learn how.\n\nClick No to configure via SD card.")
+        if box_result is True:
+            webbrowser.open('https://github.com/dekuNukem/duckyPad/blob/master/troubleshooting.md#autoswitcher--usb-configuration-isnt-working-on-macos')
+        elif box_result is False:
+            select_root_folder()
+        return
 
 def enable_buttons():
     profile_add_button.config(state=NORMAL)
@@ -601,11 +630,11 @@ def backup_button_click():
     if config_dict['auto_backup_enabled']:
         messagebox.showinfo("Backups", "Auto backup is ON!\n\nAll your backups are here!")
         if 'darwin' in sys.platform:
-        	subprocess.Popen(["open", backup_path])
+            subprocess.Popen(["open", backup_path])
         elif 'linux' in sys.platform:
-        	subprocess.Popen(["xdg-open", backup_path])
+            subprocess.Popen(["xdg-open", backup_path])
         else:
-        	webbrowser.open(backup_path)
+            webbrowser.open(backup_path)
     else:
         messagebox.showinfo("Backups", "Auto backup is OFF!\n\nSelect a folder to save a backup.")
         dir_result = filedialog.askdirectory(initialdir=os.path.join(os.path.expanduser('~'), "Desktop"))
@@ -1274,6 +1303,7 @@ def t1_worker():
                 continue
         if current_hid_op == HID_SAVE:
             current_hid_op = HID_NOP
+            hid_op.duckypad_hid_close()
             try:
                 hid_op.duckypad_hid_init()
                 hid_op.duckypad_hid_file_sync(hid_dump_path, hid_modified_dir_path, dp_root_folder_display)

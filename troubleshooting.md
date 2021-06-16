@@ -36,6 +36,8 @@ Click a question below to jump to the answer!
 
 * [SD Card doesn't work on mac!](#SD-Card-doesnt-work-on-mac)
 
+* [Autoswitcher / USB configuration isn't working on macOS!](#autoswitcher--usb-configuration-isnt-working-on-macos)
+
 ## Join Our Discord!
 
 If you have some issues that's not in this list, feel free to join our [Official Discord](https://discord.gg/4sJCBx5) to ask about it! We also have discussions, script sharing, and latest updates!
@@ -201,6 +203,53 @@ In `Disk Utility`, select `Erase`, then `MS-DOS (FAT)`:
 Now the card should be readable in both macOS and duckyPad.
 
 If you want, you can copy the [sample profiles](https://github.com/dekuNukem/duckyPad/raw/master/sample_profiles.zip) back to the root of the SD card.
+
+## Autoswitcher / USB configuration isn't working on macOS!
+
+Due to the security restrictions of macOS, to use autoswitcher and USB configuration, you need to:
+
+* Enable "Input Monitoring" permission
+
+* Run the app as root
+
+Here's how:
+
+### Enable permission
+
+* Open `System Preferences` -> `Security & Privacy`
+
+* Select `Input Monitoring`
+
+* Click the lock to make changes
+
+* Press the `+` button
+
+![Alt text](resources/pics/input_mon.png)
+
+* Go to `Applications` -> `Utilities`, and add `Terminal` to the list.
+
+![Alt text](resources/pics/select_term.png)
+
+
+### Launch app as administrator
+
+* Open `System Preferences` -> `Keyboard` -> `Shortcuts` -> `Services`
+
+* Tick `New Terminal at Folder`
+
+![Alt text](resources/pics/terminal.png)
+
+* Download the latest macOS software, unzip into a folder.
+
+* `Right click` on the unzipped folder and select `New Terminal at Folder`
+
+![Alt text](resources/pics/right.png)
+
+* Type in `sh run.sh` and press enter, then enter your password.
+
+* The app should launch as administrator, and should be fully functional now.
+
+* If it still doesn't work, [let me know](#questions-or-comments)!
 
 ## Table of Contents
 
