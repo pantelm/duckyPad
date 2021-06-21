@@ -512,24 +512,7 @@ void kb_print_char(my_key *kk, int32_t chardelay, int32_t char_delay_fuzz)
   uint16_t duckcode = _asciimap[kk->code];
   if(duckcode == 0)
   	return;
-  uint16_t wtf = duckcode & 0xf000;
-  if(wtf != 0) // deadkey
-  {
-    switch(duckcode >> 12)
-    {
-      case 1: deadkey.key_type = KEY_TYPE_DEAD_GRAVE_ACCENT; break;
-      case 2: deadkey.key_type = KEY_TYPE_DEAD_ACUTE_ACCENT; break;
-      case 3: deadkey.key_type = KEY_TYPE_DEAD_CIRCUMFLEX; break;
-      case 4: deadkey.key_type = KEY_TYPE_DEAD_TILDE; break;
-      case 5: deadkey.key_type = KEY_TYPE_DEAD_DIAERESIS; break;
-      case 6: deadkey.key_type = KEY_TYPE_DEAD_CEDILLA; break;
-      default: deadkey.key_type = KEY_TYPE_UNKNOWN; deadkey.code = 0;
-    }
-    keyboard_press(&deadkey, 1);
-    delay_wrapper(chardelay, char_delay_fuzz);
-    keyboard_release(&deadkey);
-    delay_wrapper(chardelay, char_delay_fuzz);
-  }
+  uint16_t is_deadkey = duckcode & 0xf000;
   if(duckcode & SHIFT)
   {
     temp_shift_key.key_type = KEY_TYPE_MODIFIER;
@@ -544,10 +527,30 @@ void kb_print_char(my_key *kk, int32_t chardelay, int32_t char_delay_fuzz)
     keyboard_press(&temp_altgr_key, 1);
     delay_wrapper(chardelay, char_delay_fuzz);
   }
-  keyboard_press(kk, 0);
+  if(is_deadkey != 0) // deadkey
+  {
+    switch(duckcode >> 12)
+    {
+      case 1: deadkey.key_type = KEY_TYPE_DEAD_GRAVE_ACCENT; break;
+      case 2: deadkey.key_type = KEY_TYPE_DEAD_ACUTE_ACCENT; break;
+      case 3: deadkey.key_type = KEY_TYPE_DEAD_CIRCUMFLEX; break;
+      case 4: deadkey.key_type = KEY_TYPE_DEAD_TILDE; break;
+      case 5: deadkey.key_type = KEY_TYPE_DEAD_DIAERESIS; break;
+      case 6: deadkey.key_type = KEY_TYPE_DEAD_CEDILLA; break;
+      default: deadkey.key_type = KEY_TYPE_UNKNOWN; deadkey.code = 0;
+    }
+    keyboard_press(&deadkey, 1);
+    delay_wrapper(chardelay, char_delay_fuzz);
+  }
+  keyboard_press(kk, 1);
   delay_wrapper(chardelay, char_delay_fuzz);
   keyboard_release(kk);
   delay_wrapper(chardelay, char_delay_fuzz);
+  if(is_deadkey != 0) // deadkey
+  {
+    keyboard_release(&deadkey);
+    delay_wrapper(chardelay, char_delay_fuzz);
+  }
   if(duckcode & ALT_GR)
   {
     keyboard_release(&temp_altgr_key);
